@@ -32,3 +32,45 @@ ostream& operator<<(ostream& os, const Date& date)
 
     return os;
 }
+
+bool operator<(const Date& d1, const Date& d2)
+{
+    if (d1.Year < d2.Year)
+        return true;
+
+    if (d1.Year > d2.Year)
+        return false;
+
+    if (d1.Month > d2.Month)
+        return false;
+
+    if (d1.Month < d2.Month)
+        return true;
+
+    return d1.Day < d2.Day;
+}
+
+bool operator==(const Date& d1, const Date& d2)
+{
+    return d1.Year == d2.Year && d1.Month == d2.Month && d1.Day == d2.Day;
+}
+
+bool operator!=(const Date& d1, const Date& d2) 
+{ 
+    return !(d1 == d2); 
+}
+
+bool operator<=(const Date& d1, const Date& d2) 
+{ 
+    return (d1 < d2) || (d1 == d2); 
+}
+
+bool operator>(const Date& d1, const Date& d2) 
+{ 
+    return (d1 != d2) && !(d1 < d2); 
+}
+
+bool operator>=(const Date& d1, const Date& d2) 
+{ 
+    return (d1 > d2) || (d1 == d2); 
+}

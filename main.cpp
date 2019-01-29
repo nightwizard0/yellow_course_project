@@ -75,6 +75,20 @@ int main() {
   return 0;
 }
 
+template <class T>
+ostream& operator << (ostream& os, const vector<T>& v) {
+  os << "{";
+  bool first = true;
+  for (const auto& x : v) {
+    if (!first) {
+      os << ", ";
+    }
+    first = false;
+    os << x;
+  }
+  return os << "}";
+}
+
 void TestParseEvent() {
   {
     istringstream is("event");
@@ -89,7 +103,7 @@ void TestParseEvent() {
     vector<string> events;
     events.push_back(ParseEvent(is));
     events.push_back(ParseEvent(is));
-    //AssertEqual(events, vector<string>{"first event  ", "second event"}, "Parse multiple events");
+    AssertEqual(events, vector<string>{"first event  ", "second event"}, "Parse multiple events");
   }
 }
 

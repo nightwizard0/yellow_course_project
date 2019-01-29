@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <map>
 
 #include "date.h"
 
@@ -27,4 +28,7 @@ public:
     EntryList FindIf(Predicate p) { (void) p; return EntryList(); }
 
     Entry Last(const Date& date); 
+
+private:
+    map<Date, vector<string>> db_;
 };

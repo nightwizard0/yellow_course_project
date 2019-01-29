@@ -22,6 +22,18 @@ public:
     virtual bool Evaluate(const Date& date, const string& event) const = 0;
 };
 
+class EmptyNode : public Node
+{
+public:
+    EmptyNode() {}
+    
+    bool Evaluate(const Date& date, const string& event) const override 
+    { 
+        (void) date; (void) event;
+        return true;
+    }
+};
+
 class DateComparisonNode : public Node
 {
 public:
@@ -34,18 +46,6 @@ public:
 private:
     const Comparison cmp_;
     const Date date_;
-};
-
-class EmptyNode : public Node
-{
-public:
-    EmptyNode() {}
-    
-    bool Evaluate(const Date& date, const string& event) const override 
-    { 
-        (void) date; (void) event;
-        return true;
-    }
 };
 
 class EventComparisonNode : public Node
