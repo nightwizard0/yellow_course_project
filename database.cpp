@@ -2,35 +2,60 @@
 
 #include <algorithm>
 
+bool operator<(const Entry& a, const Entry& b)
+{
+    return a.date() < b.date();
+}
+
+bool operator==(const Entry& a, const Entry& b)
+{
+    return a.date() == b.date() && a.event() == b.event();
+}
+
 ostream& operator<<(ostream& os, const Entry& entry)
 {
-    os << entry.date << " " << entry.event;
+    os << entry.date() << " " << entry.event();
     return os;
 }
 
 void Database::Add(const Date& date, const string& event)
 {
-    auto& ref = db_[date];
+    Entry item(date, event);
 
-    if (find(ref.cbegin(), ref.cend(), event) != ref.cend())
+    auto it = lower_bound(db_.cbegin(), db_.cend(), item);
+
+    if (it != db_.cend() && *it == item)
         return ;
 
-    ref.push_back(event); 
+    auto next_it = upper_bound(it, db_.cend(), item);
+
+    if (find(it, next_it, item) != next_it)
+        return ;
+    
+    db_.insert(next_it, item);
 }
 
-void Database::Print(ostream& os)
+void Database::Print(ostream& os) const
 {
-    for (const auto& [date, events] : db_)
+    for (const auto& entry : db_)
     {
-        for (const auto& event : events)
-        {
-            os << date << " " << event << endl;
-        }
+        os << entry << endl;
     }
 }
 
-Entry Database::Last(const Date& date)
+Entry Database::Last(const Date& date) const
 {
-    (void) date;
-    return Entry();
+    Entry item(date);
+
+    if (db_.empty())
+        throw invalid_argument("Empty database");
+
+    auto it = lower_bound(db_.cbegin(), db_.cend(), item);
+
+    if (it == db_.cbegin() && item < *it)
+        throw invalid_argument("No entries for requested date");
+
+    for (; it != db_.cend() && (*it).date() == date; it++);
+    
+    return *prev(it);
 } 
