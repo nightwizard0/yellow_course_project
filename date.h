@@ -14,6 +14,8 @@ public:
     {}
 
     const int Year, Month, Day;
+
+    string tostring() const;
 };
 
 Date ParseDate(istream& is);

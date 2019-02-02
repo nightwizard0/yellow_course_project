@@ -3,6 +3,8 @@
 #include <vector>
 #include <list>
 #include <algorithm>
+#include <utility>
+#include <unordered_map>
 
 #include "date.h"
 
@@ -17,8 +19,9 @@ public:
         : date_(date), event_(event)
     {}
 
-    Date date() const { return date_; }
-    string event() const { return event_; }
+    Date date()         const { return date_; }
+    string event()      const { return event_; }
+    string tostring()   const { return date_.tostring() + " " + event_; }
 };
 
 bool operator<(const Entry& a, const Entry& b);
@@ -40,7 +43,14 @@ public:
         
         db_.remove_if([&](const Entry& item)
         {
-            return p(item.date(), item.event());
+            bool retval = p(item.date(), item.event());
+
+            if (retval)
+            {
+                const auto pos = cache_.find(item.tostring());
+                if (pos != cache_.cend()) cache_.erase(pos);
+            }
+            return retval;
         });
 
         return static_cast<int>(size - db_.size());    
@@ -74,4 +84,6 @@ public:
 
 private:
     list<Entry> db_;
+    unordered_map<string, bool> cache_; 
+    
 };

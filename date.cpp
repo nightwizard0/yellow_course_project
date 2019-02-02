@@ -1,6 +1,7 @@
 #include <string>
 #include <stdexcept>
 #include <iomanip>
+#include <sstream>
 
 #include "date.h"
 
@@ -73,4 +74,10 @@ bool operator>(const Date& d1, const Date& d2)
 bool operator>=(const Date& d1, const Date& d2) 
 { 
     return (d1 > d2) || (d1 == d2); 
+}
+
+string Date::tostring() const 
+{
+    ostringstream ss; ss << *this;
+    return ss.str();
 }

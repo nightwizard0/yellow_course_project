@@ -21,18 +21,16 @@ ostream& operator<<(ostream& os, const Entry& entry)
 void Database::Add(const Date& date, const string& event)
 {
     Entry item(date, event);
+    auto cache_key = item.tostring();
 
-    auto it = lower_bound(db_.cbegin(), db_.cend(), item);
-
-    if (it != db_.cend() && *it == item)
+    if (cache_.find(cache_key) != cache_.cend())
         return ;
 
-    auto next_it = upper_bound(it, db_.cend(), item);
-
-    if (find(it, next_it, item) != next_it)
-        return ;
+    auto it = upper_bound(db_.cbegin(), db_.cend(), item);
     
-    db_.insert(next_it, item);
+    db_.insert(it, item);
+
+    cache_[cache_key] = true;
 }
 
 void Database::Print(ostream& os) const
