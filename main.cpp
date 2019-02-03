@@ -9,8 +9,18 @@
 
 using namespace std;
 
-string ParseEvent(istream& is) {
-  // Реализуйте эту функцию
+string ParseEvent(istream& is) 
+{
+  string event;
+  getline(is, event);
+
+  auto first = event.find_first_not_of(" ");
+
+  if (first == string::npos)
+    return string();
+  
+  event.erase(0, first);
+  return event;
 }
 
 void TestAll();

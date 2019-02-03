@@ -1,12 +1,13 @@
 CC=g++
-CFLAGS=-std=c++1z -Wall -Wextra -Wpedantic -Werror
+CFLAGS=-c -std=c++1z -Wall -Wextra -Wpedantic -Werror
 LDFLAGS=
-SOURCES=main.cpp token.cpp condition_parser.cpp condition_parser_test.cpp date.cpp database.cpp node.cpp
+SOURCES=$(wildcard *.cpp)
+HEADERS=$(wildcard *.h)
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=course_project
 
 all: $(SOURCES) $(EXECUTABLE)
-	
+
 $(EXECUTABLE): $(OBJECTS) 
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
@@ -15,3 +16,8 @@ $(EXECUTABLE): $(OBJECTS)
 
 clean:
 	rm -rf *.o $(EXECUTABLE)
+
+package:
+	rm -f $(EXECUTABLE).zip
+	zip $(EXECUTABLE).zip $(SOURCES) $(HEADERS)
+	zip -d  $(EXECUTABLE).zip test_runner.h
