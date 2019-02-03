@@ -18,42 +18,51 @@ ostream& operator<<(ostream& os, const Entry& entry)
     return os;
 }
 
-void Database::Add(const Date& date, const string& event)
+void Database::EventList::Print(ostream& os, const Date& date) const
 {
-    Entry item(date, event);
-    auto cache_key = item.tostring();
+    for (const auto& event : events_)
+        os << date << " " << event << endl;
+}
 
-    if (cache_.find(cache_key) != cache_.cend())
-        return ;
+void Database::Add(const Date& date, const string& event)
+{  
+    auto it = db_.find(date);
 
-    auto it = upper_bound(db_.cbegin(), db_.cend(), item);
-    
-    db_.insert(it, item);
+    if (it != db_.end())
+    {
+        auto& events = it->second;
 
-    cache_[cache_key] = true;
+        if (events.Contains(event))
+            return;
+        
+        events.Add(event);
+    }
+    else
+    {
+        db_[date].Add(event);
+    }
 }
 
 void Database::Print(ostream& os) const
 {
-    for (const auto& entry : db_)
+    for (const auto& [date, events] : db_)
     {
-        os << entry << endl;
+        events.Print(os, date);
     }
 }
 
 Entry Database::Last(const Date& date) const
 {
-    Entry item(date);
-
     if (db_.empty())
         throw invalid_argument("Empty database");
 
-    auto it = lower_bound(db_.cbegin(), db_.cend(), item);
+    auto it = db_.lower_bound(date);
 
-    if (it == db_.cbegin() && item < *it)
+    if (it == db_.cbegin() && date < it->first)
         throw invalid_argument("No entries for requested date");
 
-    for (; it != db_.cend() && (*it).date() == date; it++);
-    
-    return *prev(it);
+    if (it == db_.cend() || it->first != date)
+        it = prev(it);
+
+    return Entry(it->first, it->second.Last());
 } 
