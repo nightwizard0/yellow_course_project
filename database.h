@@ -1,10 +1,10 @@
 #pragma once
 
 #include <vector>
-#include <list>
 #include <algorithm>
 #include <utility>
-#include <unordered_map>
+#include <map>
+#include <set>
 
 #include "date.h"
 
@@ -39,21 +39,22 @@ public:
     template<class Predicate>
     int RemoveIf(Predicate p) 
     { 
-        size_t size = db_.size();
-        
-        db_.remove_if([&](const Entry& item)
+        int count = 0;
+
+        vector<Date> clean;
+
+        for (auto& [date, events] : db_)
         {
-            bool retval = p(item.date(), item.event());
+            count += events.RemoveIf(date, p);
 
-            if (retval)
-            {
-                const auto pos = cache_.find(item.tostring());
-                if (pos != cache_.cend()) cache_.erase(pos);
-            }
-            return retval;
-        });
+            if (events.IsEmpty())
+                clean.push_back(date);
+        }
 
-        return static_cast<int>(size - db_.size());    
+        for (const auto& date : clean)
+            db_.erase(date);        
+
+        return count;
     }
 
     template<class Predicate>
@@ -61,19 +62,14 @@ public:
     { 
         EntryList result;
 
-        for (auto next_it = db_.cbegin(); next_it != db_.cend(); )
+        for (const auto& item : db_)
         {
-            auto it = find_if(next_it, db_.cend(), [&](const Entry& item)
-            {
-                return p(item.date(), item.event());
-            });
+            auto events = item.second.Events();
 
-            next_it = it;
-
-            if (it != db_.cend())
+            for (const auto& event : events)
             {
-                result.push_back(*it);
-                next_it = next(it);
+                if (p(item.first, event))
+                    result.emplace_back(item.first, event);
             }
         }
 
@@ -83,7 +79,52 @@ public:
     Entry Last(const Date& date) const;
 
 private:
-    list<Entry> db_;
-    unordered_map<string, bool> cache_; 
-    
+
+    class EventList
+    {
+        vector<string> events_;
+        set<string> cache_;
+
+        public:
+
+        void Add(const string& event)
+        {
+            events_.push_back(event);
+            cache_.insert(event);          
+        }
+
+        bool Contains(const string& event)  const { return cache_.count(event) != 0; }
+        const vector<string>& Events()      const { return events_; }
+        string Last()                       const { return events_.back(); }
+        bool IsEmpty()                      const { return events_.empty(); }
+
+        void Print(ostream& os, const Date& date) const;
+
+        template <typename Predicate>
+        int RemoveIf(const Date& date, Predicate p)
+        {
+            auto it = stable_partition(events_.begin(), events_.end(), [&](const string& elem)
+            {
+                return !p(date, elem);
+            });
+
+            if (it == events_.end())
+                return 0;
+
+            int count = 0;
+
+            for (auto it_next = it; it_next != events_.end(); it_next++)
+            {
+                cache_.erase(*it_next);
+                count++;
+            }
+
+            events_.erase(it, events_.end());
+
+            return count;
+        }
+
+    };
+
+    map<Date, EventList> db_;
 };
